@@ -1,0 +1,47 @@
+# ============================================
+#   NODE.JS BACKEND - GITIGNORE PROFESIONAL
+# ============================================
+
+# ---- Dependencias automáticas de Node ----
+node_modules/
+
+# ---- Archivos de entorno ----
+.env
+.env.*       # por si usás .env.development, .env.local, etc.
+
+# ---- Logs ----
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ---- Carpetas de build / distribución ----
+dist/
+build/
+
+# ---- Archivos temporales ----
+*.tmp
+*.temp
+
+# ---- Sistema operativo ----
+.DS_Store
+Thumbs.db
+
+# ---- VS Code ----
+.vscode/
+.history/
+
+# ---- Coverage (pruebas) ----
+coverage/
+
+# ---- PM2 (si lo usás) ----
+.pids
+*.pid
+*.seed
+*.pid.lock
+
+# ---- Otras caches ----
+.cache/
+.parcel-cache/
+uploads/

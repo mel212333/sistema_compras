@@ -1,0 +1,306 @@
+%PDF-1.4
+%PDFGEN
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 2339 >>
+stream
+BT /F1 10 Tf 48 800 Td 13 TL 
+(Manual de Usuario — Sistema de Compras) Tj T*
+( ) Tj T*
+(Versión: 1.0  ) Tj T*
+(Fecha: 23 de junio de 2026) Tj T*
+( ) Tj T*
+(1. Objetivo) Tj T*
+( ) Tj T*
+(Este manual explica cómo utilizar el Sistema de Compras desde la creación de un) Tj T*
+(requerimiento hasta la recepción de la mercadería. Las opciones visibles dependen del rol) Tj T*
+(asignado a cada usuario.) Tj T*
+( ) Tj T*
+(2. Ingreso y navegación) Tj T*
+( ) Tj T*
+(1. Abra el Sistema de Compras en el navegador.) Tj T*
+(2. Ingrese su correo electrónico y contraseña.) Tj T*
+(3. Presione Ingresar.) Tj T*
+( ) Tj T*
+(Al iniciar sesión verá:) Tj T*
+( ) Tj T*
+(- Inicio: resumen de requerimientos y accesos rápidos.) Tj T*
+(- Menú lateral: módulos habilitados para su rol. Puede contraerlo o expandirlo con el botón) Tj T*
+(superior.) Tj T*
+(- Perfil: nombre, correo, rol, sector e ID de usuario.) Tj T*
+(- Salir: cierra la sesión. Úselo especialmente en equipos compartidos.) Tj T*
+( ) Tj T*
+(Si las credenciales no funcionan, verifique el correo y la contraseña. Si el problema) Tj T*
+(continúa, solicite al administrador que confirme que su usuario esté activo.) Tj T*
+( ) Tj T*
+(3. Roles y accesos) Tj T*
+( ) Tj T*
+( Rol     Función principal ) Tj T*
+( Administrador     Acceso general, aprobaciones y administración de usuarios. ) Tj T*
+( Solicitante     Crear, enviar y consultar sus requerimientos. ) Tj T*
+( Jefe de sector     Revisar requerimientos de su sector y realizar la aprobación N1. ) Tj T*
+( Aprobador segunda firma     Revisar y realizar la aprobación N2. ) Tj T*
+( Compras     Cargar cotizaciones, comparar ofertas, adjudicar y asignar OC. ) Tj T*
+( Depósito     Registrar la recepción y calificar proveedores. ) Tj T*
+( ) Tj T*
+(4. Estados del requerimiento) Tj T*
+( ) Tj T*
+( Estado     Significado ) Tj T*
+( Borrador     La solicitud todavía puede revisarse antes de enviarla. ) Tj T*
+( Pendiente aprobación N1     Espera la decisión del jefe de sector. ) Tj T*
+( Pendiente aprobación N2     Superó N1 y espera la segunda firma. ) Tj T*
+( Aprobado     Está disponible para que Compras solicite o cargue cotizaciones. ) Tj T*
+( Rechazado     Fue rechazado durante la aprobación. Consulte el motivo. ) Tj T*
+( Cotizado     Tiene ofertas de proveedores cargadas. ) Tj T*
+( Listo para OC     Los ítems fueron adjudicados. ) Tj T*
+ET
+endstream
+endobj
+4 0 obj
+<< /Length 2199 >>
+stream
+BT /F1 10 Tf 48 800 Td 13 TL 
+( Finalizado     Tiene uno o más códigos de orden de compra asignados. ) Tj T*
+( ) Tj T*
+(Flujo normal: Borrador ? Aprobación N1 ? Aprobación N2 ? Aprobado ? Cotizado ? Listo para OC) Tj T*
+(? Finalizado.) Tj T*
+( ) Tj T*
+(5. Consultar requerimientos) Tj T*
+( ) Tj T*
+(1. Ingrese a Requerimientos.) Tj T*
+(2. Use los filtros o la búsqueda para localizar una solicitud.) Tj T*
+(3. Abra el requerimiento para ver sus datos, ítems, estado e historial.) Tj T*
+(4. Las acciones disponibles aparecerán según el estado y su rol.) Tj T*
+( ) Tj T*
+(6. Crear un requerimiento) Tj T*
+( ) Tj T*
+(Disponible para Solicitante y Administrador.) Tj T*
+( ) Tj T*
+(1. Ingrese a Requerimientos y seleccione Nuevo requerimiento.) Tj T*
+(2. Elija el tipo:) Tj T*
+(   - Normal: sigue el circuito de dos aprobaciones.) Tj T*
+(   - Express: se utiliza para una compra urgente; requiere justificación y documentación) Tj T*
+(adjunta, y pasa directamente a Compras.) Tj T*
+(3. Complete los datos generales solicitados, como sector, centro de costo, planta o lugar de) Tj T*
+(entrega.) Tj T*
+(4. Agregue los productos o servicios. Indique descripción, cantidad y demás datos requeridos) Tj T*
+(para cada ítem.) Tj T*
+(5. Revise la información y presione Guardar requerimiento.) Tj T*
+(6. En una solicitud normal guardada como borrador, presione Enviar para iniciar la) Tj T*
+(aprobación.) Tj T*
+( ) Tj T*
+(Antes de enviar, compruebe cantidades, especificaciones y destino. Una descripción clara) Tj T*
+(ayuda a que los proveedores coticen el mismo producto o servicio.) Tj T*
+( ) Tj T*
+(7. Aprobar o rechazar) Tj T*
+( ) Tj T*
+(Aprobación N1) Tj T*
+( ) Tj T*
+(Disponible para el Jefe de sector correspondiente y el Administrador.) Tj T*
+( ) Tj T*
+(1. Abra Requerimientos y localice los pendientes de aprobación N1.) Tj T*
+(2. Revise solicitante, sector, centro de costo e ítems.) Tj T*
+(3. Seleccione Aprobar N1 para continuar o Rechazar si requiere corrección.) Tj T*
+( ) Tj T*
+(Aprobación N2) Tj T*
+( ) Tj T*
+(Disponible según los permisos configurados en el sistema.) Tj T*
+( ) Tj T*
+(1. Abra un requerimiento en estado pendiente de aprobación N2.) Tj T*
+(2. Revise toda la solicitud.) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 2072 >>
+stream
+BT /F1 10 Tf 48 800 Td 13 TL 
+(3. Seleccione Aprobar N2 o Rechazar.) Tj T*
+( ) Tj T*
+(El sistema impide que un aprobador autorice su propia solicitud, salvo las excepciones) Tj T*
+(administrativas configuradas. N1 sólo puede aprobar solicitudes de su sector.) Tj T*
+( ) Tj T*
+(8. Gestión de Compras) Tj T*
+( ) Tj T*
+(Disponible para Compras y Administrador.) Tj T*
+( ) Tj T*
+(8.1 Abrir la bandeja) Tj T*
+( ) Tj T*
+(1. Ingrese a Compras.) Tj T*
+(2. Busque el requerimiento aprobado.) Tj T*
+(3. Abra Cotizaciones para gestionar las ofertas.) Tj T*
+( ) Tj T*
+(8.2 Cargar una cotización) Tj T*
+( ) Tj T*
+(1. Seleccione o busque el proveedor por CUIT, razón social, dirección, teléfono o correo.) Tj T*
+(2. Complete Moneda, Forma de pago, Plazo de entrega y Lugar de entrega.) Tj T*
+(3. Si la moneda lo requiere, revise la Cotización USD.) Tj T*
+(4. Adjunte el archivo recibido en PDF o imagen.) Tj T*
+(5. Cargue el precio unitario de cada ítem y, si corresponde, las observaciones.) Tj T*
+(6. Guarde la cotización.) Tj T*
+(7. Repita el proceso para cada proveedor.) Tj T*
+( ) Tj T*
+(8.3 Comparar y adjudicar) Tj T*
+( ) Tj T*
+(1. Abra la Comparativa del requerimiento.) Tj T*
+(2. Compare precio, moneda, forma de pago, entrega y archivo respaldatorio.) Tj T*
+(3. Seleccione un proveedor para cada producto. Puede adjudicar distintos ítems a distintos) Tj T*
+(proveedores.) Tj T*
+(4. Presione Guardar adjudicación.) Tj T*
+( ) Tj T*
+(El menor precio resaltado es una ayuda visual; la decisión también puede considerar calidad,) Tj T*
+(plazo, antecedentes y condiciones comerciales.) Tj T*
+( ) Tj T*
+(8.4 Asignar orden de compra) Tj T*
+( ) Tj T*
+(1. Cuando todos los ítems estén adjudicados, seleccione Asignar OC.) Tj T*
+(2. Ingrese uno o más Códigos de OC. Use Agregar código cuando haya varias órdenes.) Tj T*
+(3. Presione Guardar códigos.) Tj T*
+(4. Verifique que el requerimiento figure como finalizado o con OC asignada.) Tj T*
+( ) Tj T*
+(9. Recepción en Depósito) Tj T*
+( ) Tj T*
+(Disponible para Depósito y Administrador.) Tj T*
+( ) Tj T*
+(1. Ingrese a Depósito.) Tj T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Length 2032 >>
+stream
+BT /F1 10 Tf 48 800 Td 13 TL 
+(2. Busque por número de requerimiento, ID o número de OC.) Tj T*
+(3. Abra el registro y seleccione el estado de recepción:) Tj T*
+(   - Pendiente: todavía no fue recibido.) Tj T*
+(   - Parcial: llegó sólo una parte.) Tj T*
+(   - Recibido: la recepción quedó completa.) Tj T*
+(4. Complete la fecha estimada o real.) Tj T*
+(5. Agregue una observación, por ejemplo mercadería faltante, remito pendiente o diferencias) Tj T*
+(detectadas.) Tj T*
+(6. Guarde el seguimiento.) Tj T*
+( ) Tj T*
+(Al marcar Recibido, se abre la calificación del proveedor. Evalúe la calificación general,) Tj T*
+(precio, rapidez y calidad; agregue una observación si es útil y presione Guardar) Tj T*
+(calificación.) Tj T*
+( ) Tj T*
+(10. Calificaciones de proveedores) Tj T*
+( ) Tj T*
+(El módulo Calificaciones está disponible para Administrador, Compras y Depósito. Permite:) Tj T*
+( ) Tj T*
+(- consultar el promedio de cada proveedor;) Tj T*
+(- filtrar por proveedor;) Tj T*
+(- revisar las calificaciones registradas y sus observaciones.) Tj T*
+( ) Tj T*
+(11. Administración de usuarios) Tj T*
+( ) Tj T*
+(Disponible sólo para Administrador.) Tj T*
+( ) Tj T*
+(Crear un usuario) Tj T*
+( ) Tj T*
+(1. Ingrese a Usuarios.) Tj T*
+(2. Complete Nombre, Email, Rol, Sector y Contraseña.) Tj T*
+(3. Presione Crear usuario.) Tj T*
+( ) Tj T*
+(Editar, dar de baja o reactivar) Tj T*
+( ) Tj T*
+(1. Localice al usuario en la lista.) Tj T*
+(2. Use Editar para modificar sus datos. La nueva contraseña puede dejarse vacía para) Tj T*
+(conservar la actual.) Tj T*
+(3. Use Baja para impedir el acceso sin borrar el registro.) Tj T*
+(4. Use Reactivar para devolverle el acceso.) Tj T*
+( ) Tj T*
+(Asigne el rol y sector con cuidado: ambos determinan qué información y acciones tendrá) Tj T*
+(disponibles el usuario.) Tj T*
+( ) Tj T*
+(12. Problemas frecuentes) Tj T*
+( ) Tj T*
+( Problema     Qué hacer ) Tj T*
+( No puedo ingresar     Verifique correo y contraseña; solicite al administrador que confirme) Tj T*
+(que el usuario esté activo.) Tj T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 1505 >>
+stream
+BT /F1 10 Tf 48 800 Td 13 TL 
+( No veo un menú o botón     La opción puede no corresponder a su rol o al estado actual del) Tj T*
+(requerimiento.) Tj T*
+( No puedo aprobar     Compruebe el nivel pendiente, el sector y que la solicitud no sea) Tj T*
+(propia.) Tj T*
+( No puedo asignar una OC     Confirme que existan cotizaciones y que todos los ítems estén) Tj T*
+(adjudicados.) Tj T*
+( No aparece en Depósito     El requerimiento debe tener una OC asignada. ) Tj T*
+( Un archivo no carga     Verifique el formato admitido, el tamaño y la conexión; vuelva a) Tj T*
+(intentarlo.) Tj T*
+( La información no se actualiza     Presione Actualizar o recargue la página. Evite repetir) Tj T*
+(una acción mientras el sistema indique que está guardando.) Tj T*
+( ) Tj T*
+(Si el error continúa, informe al administrador: usuario, número de requerimiento, acción) Tj T*
+(realizada, mensaje mostrado y una captura de pantalla.) Tj T*
+( ) Tj T*
+(13. Buenas prácticas) Tj T*
+( ) Tj T*
+(- No comparta su contraseña.) Tj T*
+(- Cierre la sesión al terminar.) Tj T*
+(- Evite datos ambiguos en las descripciones de los ítems.) Tj T*
+(- Adjunte siempre la documentación que respalda cotizaciones y compras express.) Tj T*
+(- Verifique los códigos de OC antes de guardarlos.) Tj T*
+(- Registre recepciones parciales y diferencias en observaciones.) Tj T*
+( ) Tj T*
+(---) Tj T*
+( ) Tj T*
+(Este documento describe la versión actual del sistema. Los nombres y opciones pueden cambiar) Tj T*
+(en futuras actualizaciones.) Tj T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+10 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+11 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+12 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+13 0 obj
+<< /Type /Pages /Kids [8 0 R 9 0 R 10 0 R 11 0 R 12 0 R] /Count 5 >>
+endobj
+14 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
+endobj
+xref
+0 15
+0000000000 65535 f 
+0000000017 00000 n 
+0000000114 00000 n 
+0000000216 00000 n 
+0000002607 00000 n 
+0000004858 00000 n 
+0000006982 00000 n 
+0000009066 00000 n 
+0000010623 00000 n 
+0000010760 00000 n 
+0000010897 00000 n 
+0000011035 00000 n 
+0000011173 00000 n 
+0000011311 00000 n 
+0000011396 00000 n 
+trailer
+<< /Size 15 /Root 14 0 R >>
+startxref
+11447
+%%EOF

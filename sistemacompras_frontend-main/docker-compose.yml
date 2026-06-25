@@ -1,0 +1,64 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:4001/api
+      VITE_API_ORIGIN: http://localhost:4001
+
+  backend:
+    build:
+      context: ../compras-backend-node
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4001:4000"
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: sistema_compras
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_SSL: "false"
+      JWT_SECRET: local-docker-cambiar-en-produccion
+      JWT_EXPIRES: 1d
+      CORS_ORIGIN: http://localhost:5173
+      UPLOAD_DIR: /app/uploads
+      DB_SYNC: "true"
+      DB_SYNC_ALTER: "true"
+      DEMO_SEED: "true"
+      DEMO_PASSWORD: demo1234
+    volumes:
+      - backend_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://10.0.0.118:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sistema_compras
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sistema_compras"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  backend_uploads:
+  postgres_data:

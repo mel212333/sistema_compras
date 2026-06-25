@@ -1,0 +1,15 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head><meta charset="utf-8"><title>Instructivo - Crear requerimiento</title>
+<style>body{font-family:Arial,sans-serif;margin:45px;color:#17233b;line-height:1.5}h1{font-size:26px;margin-bottom:4px}h2{font-size:19px;margin-top:24px;border-bottom:1px solid #ddd;padding-bottom:5px}.sub{color:#4f46e5;font-weight:bold}.nota{margin-top:25px;padding:12px;background:#fff7d6;border:1px solid #e5c75f}li{margin:6px 0}</style></head>
+<body>
+<h1>Instructivo: Crear un requerimiento</h1>
+<p class="sub">Usuario solicitante (no administrador)</p>
+<p>Este instructivo explica cómo registrar y consultar un requerimiento en el Sistema de Compras.</p>
+<h2>1. Iniciar sesión</h2><ol><li>Ingresar al Sistema de Compras.</li><li>Escribir el correo electrónico y la contraseña.</li><li>Presionar <b>Ingresar</b>.</li></ol>
+<h2>2. Acceder a Requerimientos</h2><ol><li>En la pantalla de inicio, abrir el menú lateral con el botón <b>&gt;</b>.</li><li>Seleccionar <b>Requerimientos</b>.</li><li>El sistema mostrará los requerimientos correspondientes al usuario.</li></ol>
+<h2>3. Crear un nuevo requerimiento</h2><ol><li>Presionar <b>+ Nuevo Requerimiento</b>.</li><li>Verificar que el sector y el usuario sean correctos.</li><li>Seleccionar la planta, el centro de costo y el almacén.</li></ol>
+<h2>4. Cargar los ítems</h2><ol><li>Buscar y seleccionar el producto solicitado.</li><li>Indicar la cantidad y la unidad correspondiente.</li><li>Presionar <b>+ Agregar ítem</b>.</li><li>Repetir estos pasos para cada producto necesario.</li></ol>
+<h2>5. Completar y guardar la solicitud</h2><ol><li>Marcar <b>Requerimiento express</b> únicamente si corresponde al circuito urgente.</li><li>Escribir una descripción clara y detallada.</li><li>Revisar la información cargada.</li><li>Presionar <b>Guardar requerimiento</b>.</li></ol>
+<h2>6. Consultar el estado</h2><p>El requerimiento aparecerá con su ID, tipo, descripción, sector y estado. Inicialmente quedará como <b>Pendiente de aprobación – Nivel 1</b>.</p><p>Para consultar su avance, presionar <b>Ver</b>. La línea de seguimiento mostrará las etapas: Creado, En aprobación N1, En aprobación N2 y las etapas posteriores hasta la orden de compra.</p>
+<p class="nota"><b>Nota:</b> el usuario solicitante puede crear y consultar requerimientos. Las aprobaciones corresponden a los usuarios autorizados.</p>
+</body></html>
