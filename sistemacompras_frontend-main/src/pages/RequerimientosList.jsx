@@ -281,6 +281,12 @@ const timelineStepStatus = (step) => {
 
 const REFRESH_INTERVAL_MS = 5000;
 
+const filtrosMovimiento = [
+  { value: "activos", label: "Activos" },
+  { value: "sin_movimiento", label: "Sin movimiento" },
+  { value: "todos", label: "Todos" },
+];
+
 export default function RequerimientosList() {
   const [reqs, setReqs] = useState([]);
   const [open, setOpen] = useState(false);
@@ -293,6 +299,7 @@ export default function RequerimientosList() {
   const ordenesPorIdRef = useRef({});
   const [detalleLoadingId, setDetalleLoadingId] = useState(null);
   const [visorPorId, setVisorPorId] = useState({});
+  const [filtroMovimiento, setFiltroMovimiento] = useState("activos");
 
   const [editOpen, setEditOpen] = useState(false);
   const [editReq, setEditReq] = useState(null);
@@ -404,9 +411,10 @@ export default function RequerimientosList() {
   const cargarRequerimientos = useCallback(async ({ refrescarDetalleAbierto = false } = {}) => {
     if (!user) return;
 
-    const endpoint = esCompras
+    const baseEndpoint = esCompras
       ? "/requerimientos/para-compras"
       : "/requerimientos";
+    const endpoint = `${baseEndpoint}?movimiento=${filtroMovimiento}`;
 
     try {
       const data = await apiRequest(endpoint);
@@ -419,7 +427,7 @@ export default function RequerimientosList() {
     } catch (e) {
       console.error("ERROR API:", e);
     }
-  }, [abierto, esCompras, precargarDetallesCompra, refrescarDetalle, user]);
+  }, [abierto, esCompras, filtroMovimiento, precargarDetallesCompra, refrescarDetalle, user]);
 
 
   useEffect(() => {
@@ -508,6 +516,29 @@ export default function RequerimientosList() {
             + Nuevo Requerimiento
           </button>
         )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <div>
+          <div className="text-sm font-semibold text-slate-900">Vista de requerimientos</div>
+          <div className="text-xs text-slate-500">Los activos ocultan automaticamente los que llevan 14 dias sin movimiento.</div>
+        </div>
+        <div className="inline-flex rounded border border-slate-300 bg-slate-50 p-1">
+          {filtrosMovimiento.map((filtro) => (
+            <button
+              key={filtro.value}
+              type="button"
+              onClick={() => setFiltroMovimiento(filtro.value)}
+              className={`rounded px-3 py-1.5 text-sm font-semibold transition ${
+                filtroMovimiento === filtro.value
+                  ? "bg-slate-800 text-white"
+                  : "text-slate-600 hover:bg-white"
+              }`}
+            >
+              {filtro.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* MODAL NUEVO */}
@@ -706,6 +737,11 @@ export default function RequerimientosList() {
                         <span className={estadoBadge(estadoMostrado.estado)}>
                           {estadoMostrado.label}
                         </span>
+                        {r.sin_movimiento && (
+                          <span className="ml-2 inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                            {r.dias_sin_movimiento} dias sin movimiento
+                          </span>
+                        )}
                       </div>
                     </td>
 

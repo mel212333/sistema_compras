@@ -23,6 +23,7 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
 
   // Modal agregar presupuesto
   const [addOpen, setAddOpen] = useState(false);
+  const [editingPresupuesto, setEditingPresupuesto] = useState(null);
   const [adding, setAdding] = useState(false);
   const [ocOpen, setOcOpen] = useState(false);
   const [ocCodes, setOcCodes] = useState([""]);
@@ -99,19 +100,26 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
   const proveedores = data?.proveedores ?? [];
 
   const presupuestoValido = useMemo(() => {
-    if (!form.archivo) return false;
+    if (!editingPresupuesto && !form.archivo) return false;
     if (!items || items.length === 0) return false;
     return items.every((it) => Number(form.precios?.[it.id] || 0) > 0);
-  }, [form.archivo, form.precios, items]);
+  }, [editingPresupuesto, form.archivo, form.precios, items]);
 
   const guardarPresupuestoDisabledReason = useMemo(() => {
+    if (editingPresupuesto) {
+      if (!items || items.length === 0) return "No hay items para cotizar.";
+      if (!items.every((it) => Number(form.precios?.[it.id] || 0) > 0)) {
+        return "Completa el precio unitario de cada item antes de guardar.";
+      }
+      return null;
+    }
     if (!form.archivo) return "Adjuntá el archivo del presupuesto para continuar.";
     if (!items || items.length === 0) return "No hay ítems para cotizar.";
     if (!items.every((it) => Number(form.precios?.[it.id] || 0) > 0)) {
       return "Completá el precio unitario de cada ítem antes de guardar.";
     }
     return null;
-  }, [form.archivo, form.precios, items]);
+  }, [editingPresupuesto, form.archivo, form.precios, items]);
 
   const proveedoresFiltrados = useMemo(() => {
     const q = proveedorSearch.trim().toLowerCase();
@@ -228,7 +236,7 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
     }
   };
 
-  const abrirAgregar = () => {
+  const resetPresupuestoForm = () => {
     setForm({
       id_proveedor: "",
       moneda: "ARS",
@@ -243,6 +251,37 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
       precios: {},
     });
     setProveedorSearch("");
+    setProveedorFormOpen(false);
+    setProveedorForm({ nombre: "", cuit: "", direccion: "", telefono: "", email: "" });
+  };
+
+  const abrirAgregar = () => {
+    setEditingPresupuesto(null);
+    resetPresupuestoForm();
+    setAddOpen(true);
+  };
+
+  const abrirEditar = (presupuesto) => {
+    const precios = {};
+    for (const pi of presupuesto.items || []) {
+      precios[pi.id_requerimiento_item] = pi.precio_unitario ?? "";
+    }
+
+    setEditingPresupuesto(presupuesto);
+    setForm({
+      id_proveedor: presupuesto.id_proveedor || presupuesto.proveedor?.id || "",
+      moneda: presupuesto.moneda || "ARS",
+      pago_tipo: presupuesto.pago_tipo || presupuesto.forma_pago || DEFAULT_CONDICION_PAGO,
+      plazo_entrega: presupuesto.plazo_entrega || "",
+      lugar_entrega: presupuesto.lugar_entrega || "",
+      tipo_cambio: presupuesto.tipo_cambio || "",
+      tipo_cambio_fecha: presupuesto.tipo_cambio_fecha || "",
+      tipo_cambio_fuente: presupuesto.tipo_cambio_fuente || "",
+      archivo: null,
+      observaciones: presupuesto.observaciones || "",
+      precios,
+    });
+    setProveedorSearch(presupuesto.proveedor?.nombre || "");
     setProveedorFormOpen(false);
     setProveedorForm({ nombre: "", cuit: "", direccion: "", telefono: "", email: "" });
     setAddOpen(true);
@@ -283,15 +322,18 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
     e.preventDefault();
 
     if (!form.id_proveedor) return alert("Elegi proveedor");
-    if (!form.archivo) return alert("Adjunta el archivo (PDF/imagen)");
+    if (!editingPresupuesto && !form.archivo) return alert("Adjunta el archivo (PDF/imagen)");
     if (!presupuestoValido) return alert(guardarPresupuestoDisabledReason || "Completá los precios para cada ítem.");
 
     // evitar proveedor repetido en el mismo requerimiento
-    const yaExiste = presupuestos.some((p) => String(p.id_proveedor) === String(form.id_proveedor));
+    const yaExiste = presupuestos.some(
+      (p) =>
+        String(p.id_proveedor) === String(form.id_proveedor) &&
+        String(p.id) !== String(editingPresupuesto?.id || "")
+    );
     if (yaExiste) return alert("Ese proveedor ya tiene un presupuesto cargado para este requerimiento.");
 
-    setAdding(true);
-    try {
+    const buildFormData = () => {
       const fd = new FormData();
       fd.append("id_proveedor", String(form.id_proveedor));
       fd.append("moneda", form.moneda || "ARS");
@@ -305,7 +347,7 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
         fd.append("tipo_cambio_fuente", form.tipo_cambio_fuente || "");
       }
       fd.append("observaciones", form.observaciones || "");
-      fd.append("archivo", form.archivo);
+      if (form.archivo) fd.append("archivo", form.archivo);
 
       fd.append(
         "detalles",
@@ -317,9 +359,27 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
         )
       );
 
-      await apiRequest(`/requerimientos/${requerimientoId}/presupuestos`, "POST", fd);
+      return fd;
+    };
+
+    setAdding(true);
+    try {
+      if (editingPresupuesto?.id) {
+        try {
+          await apiRequest(
+            `/requerimientos/${requerimientoId}/presupuestos/${editingPresupuesto.id}`,
+            "PUT",
+            buildFormData()
+          );
+        } catch (err) {
+          await apiRequest(`/presupuestos/${editingPresupuesto.id}`, "PUT", buildFormData());
+        }
+      } else {
+        await apiRequest(`/requerimientos/${requerimientoId}/presupuestos`, "POST", buildFormData());
+      }
 
       setAddOpen(false);
+      setEditingPresupuesto(null);
       await cargar();
       setModo("PRESUPUESTOS");
     } catch (err) {
@@ -524,6 +584,7 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
                             <th className="p-3 text-center w-32">Pago</th>
                             <th className="p-3 text-right w-44">Total</th>
                             <th className="p-3 text-center w-28">PDF</th>
+                            <th className="p-3 text-center w-28">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -556,13 +617,22 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
                                     <span className="text-slate-400">-</span>
                                   )}
                                 </td>
+                                <td className="p-3 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => abrirEditar(p)}
+                                    className="rounded border bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                                  >
+                                    Editar
+                                  </button>
+                                </td>
                               </tr>
                             );
                           })}
 
                           {presupuestos.length === 0 && (
                             <tr>
-                              <td colSpan={5} className="p-6 text-center text-gray-500">
+                              <td colSpan={6} className="p-6 text-center text-gray-500">
                                 No hay presupuestos cargados todavia.
                               </td>
                             </tr>
@@ -674,11 +744,16 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
             className="bg-white w-[min(1024px,100%)] h-[88vh] rounded-xl shadow-2xl overflow-hidden flex flex-col"
           >
             <div className="px-5 py-4 border-b flex justify-between items-center shrink-0">
-              <div className="font-semibold text-slate-800">Agregar presupuesto</div>
+              <div className="font-semibold text-slate-800">
+                {editingPresupuesto ? "Editar presupuesto" : "Agregar presupuesto"}
+              </div>
               <button
                 type="button"
                 className="h-9 w-9 rounded hover:bg-slate-100 text-gray-500 hover:text-slate-900"
-                onClick={() => setAddOpen(false)}
+                onClick={() => {
+                  setAddOpen(false);
+                  setEditingPresupuesto(null);
+                }}
               >
                 x
               </button>
@@ -806,7 +881,9 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
 
                 {/* Archivo */}
                 <div className="md:col-span-12">
-                  <label className="text-sm font-medium text-slate-700">Archivo (PDF/imagen)</label>
+                  <label className="text-sm font-medium text-slate-700">
+                    Archivo (PDF/imagen){editingPresupuesto ? " - opcional" : ""}
+                  </label>
                   <input
                     type="file"
                     accept="application/pdf,image/*"
@@ -816,6 +893,11 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
                   {form.archivo?.name && (
                     <div className="text-xs text-slate-600 mt-1">
                       Archivo: <span className="font-semibold">{form.archivo.name}</span>
+                    </div>
+                  )}
+                  {editingPresupuesto && !form.archivo && (
+                    <div className="text-xs text-slate-600 mt-1">
+                      Si no adjuntas un archivo nuevo, se conserva el actual.
                     </div>
                   )}
                 </div>
@@ -904,7 +986,10 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
             <div className="px-5 py-4 border-t flex flex-wrap justify-end gap-2 bg-white shrink-0">
                 <button
                   type="button"
-                  onClick={() => setAddOpen(false)}
+                  onClick={() => {
+                    setAddOpen(false);
+                    setEditingPresupuesto(null);
+                  }}
                   className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800"
                 >
                   Cancelar
@@ -915,7 +1000,7 @@ export default function CotizacionesModal({ open, onClose, requerimientoId, auto
                   className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white disabled:opacity-60"
                   title={guardarPresupuestoDisabledReason || undefined}
                 >
-                  {adding ? "Guardando..." : "Guardar presupuesto"}
+                  {adding ? "Guardando..." : editingPresupuesto ? "Guardar cambios" : "Guardar presupuesto"}
                 </button>
                 {!presupuestoValido && (
                   <div className="w-full text-xs text-rose-600 mt-1">
@@ -1214,4 +1299,3 @@ function AdjudicarPorItemTable({
     </div>
   );
 }
-

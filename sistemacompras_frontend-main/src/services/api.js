@@ -21,7 +21,18 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
   const res = await fetch(`${API_URL}${endpoint}`, options);
 
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    const preview = text.replace(/\s+/g, " ").trim().slice(0, 120);
+    throw new Error(
+      res.ok
+        ? "La respuesta del servidor no tiene formato JSON."
+        : `Error ${res.status}: el servidor devolvio una respuesta no valida.${preview ? ` (${preview})` : ""}`
+    );
+  }
 
   if (!res.ok) throw new Error((data && data.error) || `Error ${res.status}`);
 

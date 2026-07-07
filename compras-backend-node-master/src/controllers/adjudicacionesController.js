@@ -1,5 +1,4 @@
-// Ajustá estos imports a TU estructura
-const { Adjudicacion } = require("../models"); // o donde esté tu model
+const { Adjudicacion, Requerimiento } = require("../models");
 
 exports.guardarAdjudicaciones = async (req, res) => {
   try {
@@ -7,7 +6,7 @@ exports.guardarAdjudicaciones = async (req, res) => {
     const { items } = req.body;
 
     if (!requerimientoId) {
-      return res.status(400).json({ message: "requerimientoId inválido" });
+      return res.status(400).json({ message: "requerimientoId invalido" });
     }
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -24,24 +23,28 @@ exports.guardarAdjudicaciones = async (req, res) => {
         });
       }
 
-      // 1 adjudicación por item (update si existe, create si no)
       const existente = await Adjudicacion.findOne({
         where: { id_requerimiento_item },
       });
 
       if (existente) {
         await existente.update({
-          id_requerimiento: requerimientoId, // si tu tabla lo tiene
+          id_requerimiento: requerimientoId,
           id_presupuesto_item,
         });
       } else {
         await Adjudicacion.create({
-          id_requerimiento: requerimientoId, // si tu tabla lo tiene
+          id_requerimiento: requerimientoId,
           id_requerimiento_item,
           id_presupuesto_item,
         });
       }
     }
+
+    await Requerimiento.update(
+      { fecha_ultimo_movimiento: new Date() },
+      { where: { id: requerimientoId } }
+    );
 
     return res.json({ ok: true });
   } catch (err) {

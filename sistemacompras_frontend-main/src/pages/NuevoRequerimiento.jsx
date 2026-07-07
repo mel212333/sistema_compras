@@ -95,10 +95,21 @@ export default function NuevoRequerimiento({
             value: String(p.nombre || "").toUpperCase(),
             label: String(p.nombre || "").toUpperCase(),
           })),
-          centrosCosto: (centrosRes || []).map((c) => ({
-            value: String(c.descripcion || "").toUpperCase(),
-            label: String(c.descripcion || "").toUpperCase(),
-          })),
+          centrosCosto: (centrosRes || []).map((c) => {
+            const codigo = String(c.codigo || "").trim();
+            const descripcion = String(c.descripcion || "").trim();
+            const sector = String(c.sector_nombre || c.sector?.nombre || "").trim();
+            const label = [
+              codigo,
+              descripcion,
+              sector ? `Sector: ${sector}` : "",
+            ].filter(Boolean).join(" - ");
+
+            return {
+              value: label.toUpperCase(),
+              label: label.toUpperCase(),
+            };
+          }),
           almacenes: (almacenesRes || []).map((a) => ({
             value: String(a.descripcion || "").toUpperCase(),
             label: String(a.descripcion || "").toUpperCase(),
@@ -112,20 +123,6 @@ export default function NuevoRequerimiento({
     cargarCatalogos();
   }, []);
  
-  useEffect(() => {
-  if (!items || items.length === 0) return;
-
-  const texto = items
-    .filter((it) => it.descripcion)
-    .map(
-      (it) =>
-        `${it.descripcion} (${it.cantidad || 1} ${it.unidad || ""})`
-    )
-    .join(", ");
-
-  setDescripcion(texto);
-}, [items]);
-
   const almacenesDisponibles = useMemo(() => {
     return catalogos.almacenes.length > 0
       ? catalogos.almacenes
@@ -203,11 +200,7 @@ const seleccionarProducto = (p) => {
       return;
     }
 
-    const descripcionFinal =
-      descripcion.trim() ||
-      itemsLimpios
-        .map((it) => `${it.descripcion} (${it.cantidad || 1} ${it.unidad || ""})`)
-        .join(", ");
+    const descripcionFinal = descripcion.trim();
 
     if (esExpress && !justificacionExpress.trim()) {
       alert("Agrega una justificacion para el requerimiento express");
@@ -537,5 +530,3 @@ const seleccionarProducto = (p) => {
     </form>
   );
 }
-
-

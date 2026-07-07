@@ -129,8 +129,10 @@ router.post("/", async (req, res) => {
         );
 
         requerimiento.estado = "FINALIZADO";
-        await requerimiento.save({ transaction });
       }
+
+      requerimiento.fecha_ultimo_movimiento = new Date();
+      await requerimiento.save({ transaction });
     });
 
     const guardados = await sequelize.query(

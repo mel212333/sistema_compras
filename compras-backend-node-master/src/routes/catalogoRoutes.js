@@ -25,9 +25,10 @@ router.get("/centros-costo", async (_req, res) => {
   try {
     const centros = await sequelize.query(
       `
-        SELECT id, codigo, descripcion, sector_id
-        FROM centros_costo
-        ORDER BY CAST(codigo AS INTEGER) ASC NULLS LAST, codigo ASC
+        SELECT cc.id, cc.codigo, cc.descripcion, cc.sector_id, s.nombre AS sector_nombre
+        FROM centros_costo cc
+        LEFT JOIN sectores s ON s.id = cc.sector_id
+        ORDER BY CAST(cc.codigo AS INTEGER) ASC NULLS LAST, cc.codigo ASC, cc.descripcion ASC
       `,
       { type: QueryTypes.SELECT }
     );

@@ -41,6 +41,11 @@ Requerimiento.init(
       allowNull: true
     },
 
+    fecha_ultimo_movimiento: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+
     fecha_rechazo: {
       type: DataTypes.DATE,
       allowNull: true

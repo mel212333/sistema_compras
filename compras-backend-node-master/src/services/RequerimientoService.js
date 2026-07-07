@@ -6,9 +6,66 @@ const {
   RequerimientoHistorial,
 } = require("../models");
 
+const DIAS_SIN_MOVIMIENTO = 14;
+const ESTADOS_CONTROL_MOVIMIENTO = ["PEND_APROB_N1", "PEND_APROB_N2", "APROBADO"];
 
+const calcularInfoMovimiento = (req) => {
+  const data = typeof req.get === "function" ? req.get({ plain: true }) : req;
+  const base = data.fecha_ultimo_movimiento || data.fecha_envio;
+
+  if (!base || !ESTADOS_CONTROL_MOVIMIENTO.includes(data.estado)) {
+    return {
+      fecha_ultimo_movimiento: data.fecha_ultimo_movimiento || null,
+      dias_sin_movimiento: null,
+      sin_movimiento: false,
+    };
+  }
+
+  const fechaBase = new Date(base);
+  if (Number.isNaN(fechaBase.getTime())) {
+    return {
+      fecha_ultimo_movimiento: data.fecha_ultimo_movimiento || null,
+      dias_sin_movimiento: null,
+      sin_movimiento: false,
+    };
+  }
+
+  const diffMs = Date.now() - fechaBase.getTime();
+  const dias = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+  return {
+    fecha_ultimo_movimiento: data.fecha_ultimo_movimiento || base,
+    dias_sin_movimiento: dias,
+    sin_movimiento: dias >= DIAS_SIN_MOVIMIENTO,
+  };
+};
 
 class RequerimientoService {
+  diasSinMovimiento = DIAS_SIN_MOVIMIENTO;
+
+  calcularInfoMovimiento(req) {
+    return calcularInfoMovimiento(req);
+  }
+
+  filtrarPorMovimiento(requerimientos, modo = "activos") {
+    if (modo === "todos") return requerimientos;
+
+    return requerimientos.filter((req) => {
+      const info = calcularInfoMovimiento(req);
+      if (modo === "sin_movimiento") return info.sin_movimiento;
+      return !info.sin_movimiento;
+    });
+  }
+
+  async registrarMovimiento(id, transaction = null) {
+    if (!id) return;
+
+    await Requerimiento.update(
+      { fecha_ultimo_movimiento: new Date() },
+      { where: { id }, transaction }
+    );
+  }
+
   async registrarHistorial(req, estado_nuevo, usuario_id = null, motivo = null) {
     await RequerimientoHistorial.create({
       id_requerimiento: req.id,
@@ -48,6 +105,7 @@ class RequerimientoService {
     documentacion_express_url,
     estado: es_express ? "APROBADO" : "BORRADOR",
     fecha_envio: es_express ? new Date() : null,
+    fecha_ultimo_movimiento: es_express ? new Date() : null,
   });
 
     if (es_express) {
@@ -78,6 +136,7 @@ class RequerimientoService {
 
     req.estado = "PEND_APROB_N1";
     req.fecha_envio = new Date(); // ✅ NUEVO
+    req.fecha_ultimo_movimiento = req.fecha_envio;
     await req.save();
 
     return req;
@@ -114,6 +173,7 @@ async aprobarNivel1(id, usuario_id, rol) {
   req.estado = "PEND_APROB_N2";
   req.fecha_aprob_n1 = new Date();
   req.aprobado_n1_por = usuario_id;
+  req.fecha_ultimo_movimiento = new Date();
 
   await req.save();
   return req;
@@ -146,6 +206,7 @@ async aprobarNivel1(id, usuario_id, rol) {
     req.estado = "APROBADO";
     req.fecha_aprob_n2 = new Date();
     req.aprobado_n2_por = usuario_id;
+    req.fecha_ultimo_movimiento = new Date();
 
     await req.save();
     return req;
@@ -160,6 +221,7 @@ async aprobarNivel1(id, usuario_id, rol) {
     req.estado = "RECHAZADO";
     req.motivo_rechazo = motivo;
     req.fecha_rechazo = new Date(); // ✅ NUEVO
+    req.fecha_ultimo_movimiento = req.fecha_rechazo;
     await req.save();
 
     return req;
@@ -252,6 +314,8 @@ async aprobarNivel1(id, usuario_id, rol) {
       );
     }
   }
+
+  await this.registrarMovimiento(req.id);
 
   const updated = await Requerimiento.findByPk(req.id, {
     include: [{ model: RequerimientoItem, as: "items" }],

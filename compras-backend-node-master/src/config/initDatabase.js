@@ -24,6 +24,11 @@ async function ensureExtraTables() {
   `);
 
   await sequelize.query(`
+    ALTER TABLE requerimientos
+      ADD COLUMN IF NOT EXISTS fecha_ultimo_movimiento TIMESTAMP WITH TIME ZONE;
+  `);
+
+  await sequelize.query(`
     CREATE TABLE IF NOT EXISTS almacenes (
       id SERIAL PRIMARY KEY,
       codigo TEXT NOT NULL UNIQUE,
@@ -112,9 +117,10 @@ async function seedDemoData() {
 }
 
 async function initDatabase() {
-  if (!shouldRun(process.env.DB_SYNC)) return;
+  if (shouldRun(process.env.DB_SYNC)) {
+    await sequelize.sync({ alter: shouldRun(process.env.DB_SYNC_ALTER) });
+  }
 
-  await sequelize.sync({ alter: shouldRun(process.env.DB_SYNC_ALTER) });
   await ensureExtraTables();
 
   if (shouldRun(process.env.DEMO_SEED)) {

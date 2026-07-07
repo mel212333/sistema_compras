@@ -20,6 +20,12 @@ router.post(
   controller.crearPresupuesto
 );
 
+router.put(
+  "/:id/presupuestos/:presupuestoId",
+  uploadPresupuesto.single("archivo"),
+  controller.actualizarPresupuesto
+);
+
 router.get("/", controller.listar);
 router.get("/:id", controller.ver);
 router.get("/:id/cotizaciones", controller.verCotizaciones);

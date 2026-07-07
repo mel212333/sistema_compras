@@ -19,6 +19,49 @@ const parseItems = (value) => {
   }
 };
 
+const limpiarRequerimiento = (r) => {
+  const movimiento = service.calcularInfoMovimiento(r);
+
+  return {
+    id: r.id,
+    descripcion: r.descripcion,
+    estado: r.estado,
+    fecha_creacion: r.fecha_creacion,
+    fecha_envio: r.fecha_envio,
+    fecha_ultimo_movimiento: movimiento.fecha_ultimo_movimiento,
+    dias_sin_movimiento: movimiento.dias_sin_movimiento,
+    sin_movimiento: movimiento.sin_movimiento,
+    es_express: r.es_express,
+    justificacion_express: r.justificacion_express,
+    documentacion_express_url: r.documentacion_express_url,
+
+    planta: r.planta,
+    centro_costo: r.centro_costo,
+    almacen: r.almacen,
+
+    id_usuario: r.id_usuario,
+
+    usuario: r.usuario
+      ? {
+          id: r.usuario.id,
+          name: r.usuario.name,
+          email: r.usuario.email,
+          rol: r.usuario.rol,
+          sector_id: r.usuario.sector_id,
+        }
+      : null,
+
+    sector: r.sector
+      ? {
+          id: r.sector.id,
+          nombre: r.sector.nombre,
+        }
+      : null,
+
+    items: r.items || [],
+  };
+};
+
 
 class RequerimientoController {
 
@@ -242,40 +285,10 @@ async listar(req, res) {
       ],
     });
 
-    const limpio = requerimientos.map((r) => ({
-      id: r.id,
-      descripcion: r.descripcion,
-      estado: r.estado,
-      fecha_creacion: r.fecha_creacion,
-      es_express: r.es_express,
-      justificacion_express: r.justificacion_express,
-      documentacion_express_url: r.documentacion_express_url,
-
-      planta: r.planta,
-      centro_costo: r.centro_costo,
-      almacen: r.almacen,
-
-      id_usuario: r.id_usuario,
-
-      usuario: r.usuario
-        ? {
-            id: r.usuario.id,
-            name: r.usuario.name,
-            email: r.usuario.email,
-            rol: r.usuario.rol,
-            sector_id: r.usuario.sector_id,
-          }
-        : null,
-
-      sector: r.sector
-        ? {
-            id: r.sector.id,
-            nombre: r.sector.nombre,
-          }
-        : null,
-
-      items: r.items || [],
-    }));
+    const modoMovimiento = req.query.movimiento || "activos";
+    const limpio = service
+      .filtrarPorMovimiento(requerimientos, modoMovimiento)
+      .map(limpiarRequerimiento);
 
     return res.json(limpio);
   } catch (error) {
@@ -354,40 +367,10 @@ async listarParaCompras(req, res) {
       ],
     });
 
-    const limpio = requerimientos.map((r) => ({
-      id: r.id,
-      descripcion: r.descripcion,
-      estado: r.estado,
-      fecha_creacion: r.fecha_creacion,
-      es_express: r.es_express,
-      justificacion_express: r.justificacion_express,
-      documentacion_express_url: r.documentacion_express_url,
-
-      planta: r.planta,
-      centro_costo: r.centro_costo,
-      almacen: r.almacen,
-
-      id_usuario: r.id_usuario,
-
-      usuario: r.usuario
-        ? {
-            id: r.usuario.id,
-            name: r.usuario.name,
-            email: r.usuario.email,
-            rol: r.usuario.rol,
-            sector_id: r.usuario.sector_id,
-          }
-        : null,
-
-      sector: r.sector
-        ? {
-            id: r.sector.id,
-            nombre: r.sector.nombre,
-          }
-        : null,
-
-      items: r.items || [],
-    }));
+    const modoMovimiento = req.query.movimiento || "activos";
+    const limpio = service
+      .filtrarPorMovimiento(requerimientos, modoMovimiento)
+      .map(limpiarRequerimiento);
 
     return res.json(limpio);
   } catch (err) {
@@ -444,6 +427,8 @@ async crearPresupuesto(req, res) {
       );
     }
 
+    await service.registrarMovimiento(id_requerimiento);
+
     return res.status(201).json({ ok: true, presupuesto: nuevo });
   } catch (e) {
     console.error("crearPresupuesto:", e);
@@ -470,10 +455,96 @@ async crearPresupuestoSinArchivo(req, res) {
       pdf_url: null,
     });
 
+    await service.registrarMovimiento(id_requerimiento);
+
     return res.status(201).json(nuevo);
   } catch (e) {
     console.error("crearPresupuestoSinArchivo:", e);
     return res.status(500).json({ error: "No se pudo crear presupuesto" });
+  }
+}
+
+// PUT /api/requerimientos/:id/presupuestos/:presupuestoId
+async actualizarPresupuesto(req, res) {
+  try {
+    const id_requerimiento = Number(req.params.id);
+    const id_presupuesto = Number(req.params.presupuestoId);
+    const id_proveedor = Number(req.body.id_proveedor);
+
+    if (!id_requerimiento) return res.status(400).json({ error: "Requerimiento invalido" });
+    if (!id_presupuesto) return res.status(400).json({ error: "Presupuesto invalido" });
+    if (!id_proveedor) return res.status(400).json({ error: "Proveedor requerido" });
+
+    const presupuesto = await Presupuesto.findOne({
+      where: { id: id_presupuesto, id_requerimiento },
+    });
+
+    if (!presupuesto) {
+      return res.status(404).json({ error: "Presupuesto no encontrado" });
+    }
+
+    const prov = await Proveedor.findByPk(id_proveedor);
+    if (!prov) return res.status(400).json({ error: "Proveedor no existe" });
+
+    const datos = {
+      id_proveedor,
+      observaciones: req.body.observaciones || null,
+      moneda: req.body.moneda || "ARS",
+      pago_tipo: req.body.pago_tipo || "Contado",
+      forma_pago: req.body.forma_pago || req.body.pago_tipo || null,
+      plazo_entrega: req.body.plazo_entrega || null,
+      lugar_entrega: req.body.lugar_entrega || null,
+      tipo_cambio: req.body.moneda === "USD" ? req.body.tipo_cambio || null : null,
+      tipo_cambio_fecha: req.body.moneda === "USD" ? req.body.tipo_cambio_fecha || null : null,
+      tipo_cambio_fuente: req.body.moneda === "USD" ? req.body.tipo_cambio_fuente || null : null,
+    };
+
+    if (req.file) {
+      datos.pdf_url = `/uploads/presupuestos/${req.file.filename}`;
+    }
+
+    await presupuesto.update(datos);
+
+    let detalles = [];
+    try {
+      detalles = JSON.parse(req.body.detalles || "[]");
+    } catch {
+      return res.status(400).json({ error: "detalles invalidos (JSON)" });
+    }
+
+    if (Array.isArray(detalles)) {
+      await PresupuestoItem.destroy({ where: { id_presupuesto } });
+
+      const items = detalles
+        .map((d) => ({
+          id_presupuesto,
+          id_requerimiento_item: Number(d.id_item),
+          precio_unitario: Number(d.precio_unitario || 0),
+        }))
+        .filter((d) => d.id_requerimiento_item && d.precio_unitario > 0);
+
+      if (items.length > 0) {
+        await PresupuestoItem.bulkCreate(items);
+      }
+    }
+
+    await service.registrarMovimiento(id_requerimiento);
+
+    const actualizado = await Presupuesto.findByPk(id_presupuesto, {
+      include: [
+        { model: Proveedor, as: "proveedor" },
+        {
+          model: PresupuestoItem,
+          as: "items",
+          attributes: ["id", "id_requerimiento_item", "precio_unitario", "descuento", "iva_porcentaje"],
+        },
+      ],
+    });
+
+    return res.json({ ok: true, presupuesto: actualizado });
+  } catch (e) {
+    console.error("actualizarPresupuesto:", e);
+    return res.status(500).json({ error: "No se pudo actualizar el presupuesto" });
   }
 }
 
