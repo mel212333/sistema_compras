@@ -472,59 +472,6 @@ export default function RequerimientosList() {
     refrescarDetalle(r.id, { setLoading: true });
   };
 
-  const imprimirRequerimiento = async (r) => {
-    if (abierto !== r.id) {
-      setAbierto(r.id);
-    }
-
-    await refrescarDetalle(r.id, { force: true, setLoading: true });
-    window.setTimeout(() => {
-      const area = document.querySelector(`[data-print-requerimiento-id="${r.id}"]`);
-      if (!area) {
-        window.print();
-        return;
-      }
-
-      const printWindow = window.open("", "_blank", "width=900,height=700");
-      if (!printWindow) {
-        alert("El navegador bloqueo la ventana de impresion. Habilita ventanas emergentes para imprimir.");
-        return;
-      }
-
-      const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-        .map((node) => node.outerHTML)
-        .join("\n");
-
-      printWindow.document.write(`
-        <!doctype html>
-        <html>
-          <head>
-            <meta charset="utf-8" />
-            <title>Requerimiento ${r.id}</title>
-            ${styles}
-            <style>
-              @page { size: A4 portrait; margin: 12mm; }
-              body { background: #fff; color: #0f172a; font-family: Arial, sans-serif; }
-              button, iframe { display: none !important; }
-              a { color: #0f172a !important; text-decoration: none !important; }
-              section, .rounded, li { break-inside: avoid; }
-              .requerimiento-print-area { padding: 0 !important; }
-            </style>
-          </head>
-          <body>
-            <main class="requerimiento-print-area">${area.innerHTML}</main>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 250);
-    }, 100);
-  };
-
   if (!user) return <div className="p-10">Cargando usuario...</div>;
 
   const reqsFiltrados = reqs.filter((r) => {
@@ -752,7 +699,7 @@ export default function RequerimientosList() {
 
                 <Fragment key={r.id}>
                   <tr
-                    className={`${filaClass(estadoMostrado.estado, abierto === r.id)} requerimiento-summary-row cursor-pointer`}
+                    className={`${filaClass(estadoMostrado.estado, abierto === r.id)} cursor-pointer`}
                     onClick={() => {
                       if (puedeVerComparativa) {
                         navigate(`/requerimientos/${r.id}/comparativa`);
@@ -814,33 +761,6 @@ export default function RequerimientosList() {
                           }}
                         >
                           {abierto === r.id ? "Ocultar" : "Ver"}
-                        </button>
-
-                        <button
-                          type="button"
-                          title="Imprimir requerimiento"
-                          aria-label={`Imprimir requerimiento ${r.id}`}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            imprimirRequerimiento(r);
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4"
-                            aria-hidden="true"
-                          >
-                            <path d="M6 9V2h12v7" />
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                            <path d="M6 14h12v8H6z" />
-                          </svg>
                         </button>
 
 
@@ -969,44 +889,14 @@ export default function RequerimientosList() {
                   </tr>
 
                   {abierto === r.id && (
-                    <tr className="requerimiento-print-row">
+                    <tr>
                       <td colSpan="5" className="bg-slate-50 border-t border-slate-200">
-                        <div
-                          className="requerimiento-print-area p-5 space-y-5"
-                          data-print-requerimiento-id={r.id}
-                        >
+                        <div className="p-5 space-y-5">
                           {detalleLoadingId === r.id && (
                             <div className="rounded border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500">
                               Cargando detalle...
                             </div>
                           )}
-
-                          <div className="rounded border border-slate-200 bg-white px-4 py-3">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div>
-                                <div className="text-xs font-semibold uppercase text-slate-500">
-                                  Requerimiento #{r.id}
-                                </div>
-                                <h3 className="mt-1 text-xl font-bold text-slate-950">
-                                  {reqVista.descripcion || "Sin descripcion"}
-                                </h3>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                {reqVista.es_express ? (
-                                  <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                                    Express
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                                    Normal
-                                  </span>
-                                )}
-                                <span className={estadoBadge(estadoMostrado.estado)}>
-                                  {estadoMostrado.label}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
                             <div className="rounded border border-slate-200 bg-white px-3 py-2">
