@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiRequest } from "../services/api";
+import { apiBlobRequest, apiRequest } from "../services/api";
 import { useAuthContext } from "../context/AuthContext";
 import CotizacionesModal from "../components/CotizacionesModal";
 import AsignarOcModal from "../components/AsignarOcModal";
@@ -94,6 +94,50 @@ function detalleCompra(req, cotizacion) {
   };
 }
 
+function ordenesPdfDeCotizacion(cotizacion) {
+  const req = cotizacion?.requerimiento || {};
+  const items = asArray(req.items);
+  const presupuestos = asArray(req.presupuestos);
+  const adjudicaciones = asArray(cotizacion?.adjudicaciones);
+  const itemById = new Map(items.map((item) => [Number(item.id), item]));
+  const presupuestoItemIndex = new Map();
+
+  presupuestos.forEach((presupuesto) => {
+    asArray(presupuesto.items).forEach((pi) => {
+      presupuestoItemIndex.set(Number(pi.id), { presupuesto, pi });
+    });
+  });
+
+  const grupos = new Map();
+
+  adjudicaciones.forEach((adjudicacion) => {
+    const match = presupuestoItemIndex.get(Number(adjudicacion.id_presupuesto_item));
+    const item = itemById.get(Number(adjudicacion.id_requerimiento_item));
+    if (!match || !item) return;
+
+    const { presupuesto, pi } = match;
+    const key = Number(presupuesto.id);
+
+    if (!grupos.has(key)) {
+      grupos.set(key, {
+        id_proveedor: presupuesto.id_proveedor || presupuesto.proveedor?.id || null,
+        id_presupuesto: presupuesto.id,
+        moneda: presupuesto.moneda || "ARS",
+        pago_tipo: presupuesto.forma_pago || presupuesto.pago_tipo || "",
+        items: [],
+      });
+    }
+
+    grupos.get(key).items.push({
+      id_item: item.id,
+      cantidad: item.cantidad,
+      precio_unitario: pi.precio_unitario,
+    });
+  });
+
+  return Array.from(grupos.values()).filter((orden) => orden.items.length > 0);
+}
+
 export default function Compras() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
@@ -106,6 +150,7 @@ export default function Compras() {
   const [cotOpen, setCotOpen] = useState(false);
   const [cotReqId, setCotReqId] = useState(null);
   const [ocReqId, setOcReqId] = useState(null);
+  const [downloadingOcId, setDownloadingOcId] = useState(null);
 
   const rol = getUserRole(user);
   const puedeUsarCompras = can(user, "gestionarCotizaciones");
@@ -197,6 +242,32 @@ export default function Compras() {
   const abrirCotizacion = (id) => {
     setCotReqId(id);
     setCotOpen(true);
+  };
+
+  const descargarOcAdjudicada = async (reqId, cotizacion) => {
+    const ordenes = ordenesPdfDeCotizacion(cotizacion);
+    if (ordenes.length === 0) {
+      alert("No hay items adjudicados para generar la OC.");
+      return;
+    }
+
+    setDownloadingOcId(reqId);
+    try {
+      const blob = await apiBlobRequest(`/requerimientos/${reqId}/ordenes-compra/pdf`, "POST", { ordenes });
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = `OC-REQ-${reqId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(href);
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || "No se pudo descargar la OC");
+    } finally {
+      setDownloadingOcId(null);
+    }
   };
 
   if (!puedeUsarCompras) {
@@ -384,6 +455,19 @@ export default function Compras() {
                               className="rounded bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-700"
                             >
                               Asignar OC
+                            </button>
+                          )}
+                          {etapa === "finalizado" && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                descargarOcAdjudicada(req.id, cotizacionesPorId[req.id]);
+                              }}
+                              disabled={downloadingOcId === req.id}
+                              className="rounded bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-700 disabled:opacity-60"
+                            >
+                              {downloadingOcId === req.id ? "Descargando..." : "Descargar OC"}
                             </button>
                           )}
                         </div>

@@ -13,6 +13,18 @@ const CENTROS_COSTO = [
   { value: "CC-002", label: "CC-002 - Producción" },
 ];
 
+const quitarNumeracionCentroCosto = (texto) =>
+  String(texto || "")
+    .replace(/^\s*\d+\s*-\s*\d+\s*-\s*/, "")
+    .trim();
+
+const esCentroCostoSectorVisible = (centro) => {
+  const codigo = String(centro?.codigo || "").trim();
+  const match = codigo.match(/^50\s*-\s*(\d+)/);
+
+  return !match || Number(match[1]) <= 1;
+};
+
 const ALMACENES_POR_PLANTA = {
   PLANTA_CENTRAL: [
     { value: "DEP_CENTRAL", label: "Depósito Central" },
@@ -39,7 +51,7 @@ export default function NuevoRequerimiento({
   const [saving, setSaving] = useState(false);
   const [esExpress, setEsExpress] = useState(false);
   const [justificacionExpress, setJustificacionExpress] = useState("");
-  const [documentacionExpress, setDocumentacionExpress] = useState(null);
+  const [archivoRespaldo, setArchivoRespaldo] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState([]);
   const [itemActivo, setItemActivo] = useState(null);
@@ -65,7 +77,7 @@ export default function NuevoRequerimiento({
     setAlmacen(initialData.almacen || "");
     setEsExpress(!!initialData.es_express);
     setJustificacionExpress(initialData.justificacion_express || "");
-    setDocumentacionExpress(null);
+    setArchivoRespaldo(null);
 
     if (Array.isArray(initialData.items) && initialData.items.length > 0) {
       setItems(
@@ -90,26 +102,37 @@ export default function NuevoRequerimiento({
           apiRequest("/catalogos/almacenes"),
         ]);
 
+        const centrosCostoLimpios = (centrosRes || [])
+          .filter(esCentroCostoSectorVisible)
+          .reduce((opciones, c) => {
+            const descripcion = quitarNumeracionCentroCosto(c.descripcion);
+            const sector = String(c.sector_nombre || c.sector?.nombre || "").trim();
+            const label = quitarNumeracionCentroCosto(sector || descripcion).toUpperCase();
+
+            if (!label || opciones.some((opcion) => opcion.value === label)) return opciones;
+
+            return [
+              ...opciones,
+              {
+                value: label,
+                label,
+              },
+            ];
+          }, []);
+        const indiceFinCentrosCosto = centrosCostoLimpios.findIndex(
+          (centro) => centro.value === "EXCAVADORA DOOSAN - RECURSOS HIDRICOS"
+        );
+        const centrosCostoVisibles =
+          indiceFinCentrosCosto >= 0
+            ? centrosCostoLimpios.slice(0, indiceFinCentrosCosto)
+            : centrosCostoLimpios;
+
         setCatalogos({
           plantas: (plantasRes || []).map((p) => ({
             value: String(p.nombre || "").toUpperCase(),
             label: String(p.nombre || "").toUpperCase(),
           })),
-          centrosCosto: (centrosRes || []).map((c) => {
-            const codigo = String(c.codigo || "").trim();
-            const descripcion = String(c.descripcion || "").trim();
-            const sector = String(c.sector_nombre || c.sector?.nombre || "").trim();
-            const label = [
-              codigo,
-              descripcion,
-              sector ? `Sector: ${sector}` : "",
-            ].filter(Boolean).join(" - ");
-
-            return {
-              value: label.toUpperCase(),
-              label: label.toUpperCase(),
-            };
-          }),
+          centrosCosto: centrosCostoVisibles,
           almacenes: (almacenesRes || []).map((a) => ({
             value: String(a.descripcion || "").toUpperCase(),
             label: String(a.descripcion || "").toUpperCase(),
@@ -128,6 +151,11 @@ export default function NuevoRequerimiento({
       ? catalogos.almacenes
       : ALMACENES_POR_PLANTA[planta] || [];
   }, [catalogos.almacenes, planta]);
+
+  const muestraArchivoRespaldo = useMemo(() => {
+    const sectorNombre = String(user?.sector?.nombre || "").toLowerCase();
+    return sectorNombre.includes("higiene") || sectorNombre.includes("seguridad");
+  }, [user?.sector?.nombre]);
 
   const agregarItem = () => {
     if (disabledForm) return;
@@ -222,7 +250,7 @@ const seleccionarProducto = (p) => {
 
       let body = payload;
 
-      if (documentacionExpress) {
+      if (muestraArchivoRespaldo && archivoRespaldo) {
         const fd = new FormData();
         fd.append("descripcion", payload.descripcion);
         fd.append("planta", payload.planta || "");
@@ -231,7 +259,7 @@ const seleccionarProducto = (p) => {
         fd.append("items", JSON.stringify(payload.items));
         fd.append("es_express", String(payload.es_express));
         fd.append("justificacion_express", payload.justificacion_express || "");
-        fd.append("documentacion_express", documentacionExpress);
+        fd.append("documentacion_express", archivoRespaldo);
         body = fd;
       }
 
@@ -449,50 +477,53 @@ const seleccionarProducto = (p) => {
       </div>
 
       {esExpress && (
-        <div className="rounded-xl border border-amber-200 bg-white p-4 space-y-4">
-          <div>
-            <label className="text-sm font-medium text-slate-700">
-              Justificacion del express
-            </label>
-            <textarea
-              disabled={disabledForm}
-              className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-amber-300 disabled:bg-gray-100"
-              rows="3"
-              placeholder="Explica por que este requerimiento debe gestionarse como express"
-              value={justificacionExpress}
-              onChange={(e) => setJustificacionExpress(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-slate-700">
-              Documentacion de respaldo
-            </label>
-            <input
-              disabled={disabledForm}
-              type="file"
-              accept="application/pdf,image/*"
-              onChange={(e) => setDocumentacionExpress(e.target.files?.[0] || null)}
-              className="mt-1 w-full rounded-lg border bg-white p-2 disabled:bg-gray-100"
-            />
-            {documentacionExpress?.name && (
-              <div className="mt-1 text-xs text-slate-600">
-                Archivo: <span className="font-semibold">{documentacionExpress.name}</span>
-              </div>
-            )}
-            {modo === "edit" && initialData?.documentacion_express_url && !documentacionExpress && (
-              <a
-                href={apiAssetUrl(initialData.documentacion_express_url)}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 inline-block text-xs text-slate-700 underline"
-              >
-                Ver documentacion cargada
-              </a>
-            )}
-          </div>
+        <div className="rounded-xl border border-amber-200 bg-white p-4">
+          <label className="text-sm font-medium text-slate-700">
+            Justificacion del express
+          </label>
+          <textarea
+            disabled={disabledForm}
+            className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-amber-300 disabled:bg-gray-100"
+            rows="3"
+            placeholder="Explica por que este requerimiento debe gestionarse como express"
+            value={justificacionExpress}
+            onChange={(e) => setJustificacionExpress(e.target.value)}
+          />
         </div>
       )}
+
+      {muestraArchivoRespaldo && (
+        <div className="rounded-xl border bg-white p-5">
+          <label className="text-sm font-medium text-slate-700">
+            Archivo adjunto de respaldo <span className="font-normal text-slate-500">(opcional)</span>
+          </label>
+          <input
+            disabled={disabledForm}
+            type="file"
+            accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx"
+            onChange={(e) => setArchivoRespaldo(e.target.files?.[0] || null)}
+            className="mt-1 w-full rounded-lg border bg-white p-2 disabled:bg-gray-100"
+          />
+          <div className="mt-1 text-xs text-slate-500">
+            Cargalo solo cuando el requerimiento necesite certificados, habilitaciones u otra documentacion.
+          </div>
+          {archivoRespaldo?.name && (
+            <div className="mt-1 text-xs text-slate-600">
+              Archivo: <span className="font-semibold">{archivoRespaldo.name}</span>
+            </div>
+          )}
+          {modo === "edit" && initialData?.documentacion_express_url && !archivoRespaldo && (
+            <a
+              href={apiAssetUrl(initialData.documentacion_express_url)}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-block text-xs text-slate-700 underline"
+            >
+              Ver documentacion cargada
+            </a>
+          )}
+        </div>
+        )}
 
       <div className="rounded-xl border bg-white p-5">
         <label className="font-medium">Descripcion</label>

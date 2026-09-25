@@ -3,6 +3,13 @@ import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import Loader from "../components/Loader.jsx";
 import { API_URL } from "../services/config";
+import { getUserRole } from "../utils/roles";
+
+function getPostLoginPath(user, location) {
+  const requestedPath = location.state?.from?.pathname;
+  if (requestedPath && requestedPath !== "/login") return requestedPath;
+  return getUserRole(user) === "ADMIN" ? "/usuarios" : "/";
+}
 
 export default function Login() {
   const { user, login, loading } = useAuthContext();
@@ -14,7 +21,7 @@ export default function Login() {
   const [error, setError] = useState(null);
 
   if (!loading && user) {
-    const to = location.state?.from?.pathname || "/";
+    const to = getPostLoginPath(user, location);
     return <Navigate to={to} replace />;
   }
 
@@ -52,7 +59,7 @@ export default function Login() {
 
       login(userData, tokenData);
 
-      const to = location.state?.from?.pathname || "/";
+      const to = getPostLoginPath(userData, location);
       navigate(to, { replace: true });
     } catch (err) {
       setError(err.message);

@@ -121,7 +121,12 @@ export default function UsuariosAdmin() {
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-3xl font-bold">Usuarios</h2>
+        <div>
+          <h2 className="text-3xl font-bold">Usuarios por sector</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Crea usuarios, asignales un rol y vinculalos al sector correspondiente.
+          </p>
+        </div>
         <button type="button" onClick={cargar} className="px-4 py-2 rounded bg-white border hover:bg-slate-50">
           Recargar
         </button>
@@ -135,7 +140,7 @@ export default function UsuariosAdmin() {
 
       <form onSubmit={guardar} className="mt-6 bg-white rounded shadow p-5">
         <div className="flex items-center justify-between gap-3 mb-4">
-          <h3 className="text-lg font-semibold">{editando ? `Editar usuario #${form.id}` : "Nuevo usuario"}</h3>
+          <h3 className="text-lg font-semibold">{editando ? `Editar usuario #${form.id}` : "Crear usuario"}</h3>
           {editando && (
             <button type="button" onClick={limpiar} className="px-3 py-2 rounded border bg-white hover:bg-slate-50">
               Cancelar edicion

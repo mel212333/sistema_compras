@@ -35,6 +35,36 @@
     display: none !important;
   }
 
+  body.printing-requerimiento * {
+    visibility: hidden !important;
+  }
+
+  body.printing-requerimiento .requerimiento-print-area,
+  body.printing-requerimiento .requerimiento-print-area * {
+    visibility: visible !important;
+  }
+
+  body.printing-requerimiento .requerimiento-print-area {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+
+  body.printing-requerimiento .requerimiento-print-area button,
+  body.printing-requerimiento .requerimiento-print-area iframe {
+    display: none !important;
+  }
+
+  body.printing-requerimiento .requerimiento-print-area section,
+  body.printing-requerimiento .requerimiento-print-area > div {
+    break-inside: avoid;
+  }
+
   main,
   .comparison-print-root,
   .comparison-print-sheet {

@@ -39,6 +39,32 @@ export async function apiRequest(endpoint, method = "GET", body = null) {
   return data;
 }
 
+export async function apiBlobRequest(endpoint, method = "GET", body = null) {
+  const token = localStorage.getItem("token");
+
+  const headers = {};
+  if (body !== null) headers["Content-Type"] = "application/json";
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const options = { method, headers };
+  if (body !== null) options.body = JSON.stringify(body);
+
+  const res = await fetch(`${API_URL}${endpoint}`, options);
+
+  if (!res.ok) {
+    const text = await res.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
+    throw new Error((data && (data.error || data.message)) || `Error ${res.status}`);
+  }
+
+  return res.blob();
+}
+
 
 export async function login(email, password) {
   const res = await fetch(`${API_URL}/auth/login`, {
