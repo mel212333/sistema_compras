@@ -665,6 +665,13 @@ export default function RequerimientosList() {
               const codigosOc = codigosOcDe(ordenesCompra, reqBase);
               const ultimaOc = codigosOc[codigosOc.length - 1] || null;
               const reqVista = { ...reqBase, ordenes_compra: ordenesCompra };
+              const descripcionVisible =
+                reqVista.descripcion?.trim() ||
+                asArray(reqVista.items)
+                  .map((item) => item.descripcion?.trim())
+                  .filter(Boolean)
+                  .join("; ") ||
+                "Sin descripcion cargada";
               const estadoMostrado = estadoVisible(reqVista);
               const presupuestos = presupuestosDe(reqCotizacion || reqVista);
               const itemsCotizacion = asArray(reqCotizacion?.items || reqVista.items);
@@ -728,7 +735,7 @@ export default function RequerimientosList() {
                     {/* Descripcion */}
                     <td className="p-3 text-left break-words">
                       <div className="space-y-2">
-                        <div>{r.descripcion}</div>
+                        <div className="whitespace-pre-line">{descripcionVisible}</div>
                         {ultimaOc && (
                           <div className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
                             OC: {ultimaOc}
