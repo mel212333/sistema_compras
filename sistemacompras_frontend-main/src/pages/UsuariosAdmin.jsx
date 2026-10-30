@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "../services/api";
 import { useAuthContext } from "../context/AuthContext";
 import { ROLES, can } from "../utils/roles";
@@ -21,6 +21,8 @@ export default function UsuariosAdmin() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const formRef = useRef(null);
+  const nameInputRef = useRef(null);
 
   const esAdmin = can(user, "administrarUsuarios");
   const editando = Boolean(form.id);
@@ -69,6 +71,8 @@ export default function UsuariosAdmin() {
     });
     setError("");
     setShowPassword(false);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    nameInputRef.current?.focus({ preventScroll: true });
   };
 
   const guardar = async (e) => {
@@ -133,7 +137,7 @@ export default function UsuariosAdmin() {
         </div>
       )}
 
-      <form onSubmit={guardar} className="mt-6 bg-white rounded shadow p-5">
+      <form ref={formRef} onSubmit={guardar} className="mt-6 scroll-mt-24 bg-white rounded shadow p-5">
         <div className="flex items-center justify-between gap-3 mb-4">
           <h3 className="text-lg font-semibold">{editando ? `Editar usuario #${form.id}` : "Nuevo usuario"}</h3>
           {editando && (
@@ -146,7 +150,7 @@ export default function UsuariosAdmin() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div>
             <label className="text-sm font-medium text-slate-600">Nombre</label>
-            <input value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} className="mt-1 w-full border rounded px-3 py-2" />
+            <input ref={nameInputRef} value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} className="mt-1 w-full border rounded px-3 py-2" />
           </div>
           <div>
             <label className="text-sm font-medium text-slate-600">Email</label>

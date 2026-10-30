@@ -93,6 +93,7 @@ export default function Home() {
   const { user } = useAuthContext();
   const [reqs, setReqs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const role = getUserRole(user);
   const roleName = roleLabels[role] || role;
@@ -100,9 +101,13 @@ export default function Home() {
   useEffect(() => {
     const endpoint = role === "COMPRAS" ? "/requerimientos/para-compras" : "/requerimientos";
     setLoading(true);
+    setError("");
     apiRequest(endpoint)
       .then((data) => setReqs(Array.isArray(data) ? data : []))
-      .catch(() => setReqs([]))
+      .catch(() => {
+        setReqs([]);
+        setError("No pudimos cargar el resumen. Podés consultar tus requerimientos desde los accesos rápidos.");
+      })
       .finally(() => setLoading(false));
   }, [role]);
 
@@ -118,55 +123,66 @@ export default function Home() {
         : counters.BORRADOR || 0;
 
   return (
-    <div className="min-h-full bg-slate-100 p-6">
+    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
-          <section className="rounded border bg-white p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase text-slate-500">Inicio</div>
-                <h2 className="mt-1 text-3xl font-semibold text-slate-950">
+          <section
+            className="relative isolate overflow-hidden rounded-2xl bg-slate-950 bg-cover bg-center p-6 text-white shadow-lg sm:p-8 lg:p-10"
+            style={{ backgroundImage: "linear-gradient(90deg, rgba(8, 25, 55, 0.94), rgba(8, 25, 55, 0.65)), url('/ingenio-rio-grande-login.webp')" }}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" aria-hidden="true" />
+                  Ingenio Río Grande · Sistema de Compras
+                </div>
+                <h2 className="mt-5 break-words text-3xl font-semibold tracking-tight sm:text-4xl">
                   Hola, {user?.name || user?.nombre || "Usuario"}
                 </h2>
-                <p className="mt-2 max-w-3xl text-slate-600">
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-200 sm:text-base">
                   {roleCopy[role] || "Gestiona tus tareas dentro del sistema de compras."}
                 </p>
               </div>
-              <div className="rounded border bg-slate-50 px-4 py-3 text-sm">
-                <div className="font-semibold text-slate-900">{roleName}</div>
-                <div className="text-slate-500">Sector: {user?.sector?.nombre || "Sin sector"}</div>
+              <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
+                <div className="font-semibold text-white">{roleName}</div>
+                <div className="mt-1 text-slate-200">Sector: {user?.sector?.nombre || "Sin sector"}</div>
               </div>
             </div>
+            <Link to="/requerimientos" className="mt-7 inline-flex items-center gap-3 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-300">
+              Ir a requerimientos <span aria-hidden="true">→</span>
+            </Link>
           </section>
 
+          {error && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{error}</div>}
+
           <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="flex min-h-[104px] items-center justify-between gap-4 rounded border bg-white p-5">
+            <div className="flex min-h-[120px] items-center justify-between gap-4 rounded-xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
               <div className="min-w-0">
                 <div className="text-xs font-semibold uppercase text-slate-500">Pendiente principal</div>
                 <div className="mt-2 text-sm text-slate-500">
                   {role === "COMPRAS" ? "Aprobados para cotizar" : "Requieren atencion"}
                 </div>
               </div>
-              <div className="shrink-0 text-4xl font-semibold leading-none text-slate-950">{loading ? "-" : pendientesClave}</div>
+              <div className="shrink-0 text-4xl font-semibold leading-none tracking-tight text-indigo-700">{loading || error ? "—" : pendientesClave}</div>
             </div>
-            <div className="flex min-h-[104px] items-center justify-between gap-4 rounded border bg-white p-5">
+            <div className="flex min-h-[120px] items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="min-w-0">
                 <div className="text-xs font-semibold uppercase text-slate-500">Total visible</div>
                 <div className="mt-2 text-sm text-slate-500">Segun tu rol y permisos</div>
               </div>
-              <div className="shrink-0 text-4xl font-semibold leading-none text-slate-950">{loading ? "-" : reqs.length}</div>
+              <div className="shrink-0 text-4xl font-semibold leading-none tracking-tight text-slate-900">{loading || error ? "—" : reqs.length}</div>
             </div>
-            <div className="flex min-h-[104px] items-center justify-between gap-4 rounded border bg-white p-5">
+            <div className="flex min-h-[120px] items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="min-w-0">
                 <div className="text-xs font-semibold uppercase text-slate-500">Finalizados</div>
                 <div className="mt-2 text-sm text-slate-500">Con OC asignada</div>
               </div>
-              <div className="shrink-0 text-4xl font-semibold leading-none text-slate-950">{loading ? "-" : counters.FINALIZADO || 0}</div>
+              <div className="shrink-0 text-4xl font-semibold leading-none tracking-tight text-slate-900">{loading || error ? "—" : counters.FINALIZADO || 0}</div>
             </div>
           </section>
 
-          <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
-            <div className="rounded border bg-white">
-              <div className="border-b px-5 py-4">
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-5">
                 <div className="font-semibold text-slate-900">Resumen por estado</div>
                 <div className="text-sm text-slate-500">Vista adaptada a tu rol</div>
               </div>
@@ -175,31 +191,34 @@ export default function Home() {
                   <Link
                     key={state}
                     to="/requerimientos"
-                    className={`rounded border p-4 transition hover:shadow-sm ${stateClass[state] || "bg-white"}`}
+                    className={`rounded-xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${stateClass[state] || "bg-white"}`}
                   >
                     <div className="text-sm font-semibold">{stateLabels[state] || state}</div>
-                    <div className="mt-2 text-2xl font-semibold">{loading ? "-" : counters[state] || 0}</div>
+                    <div className="mt-3 flex items-end justify-between gap-2">
+                      <span className="text-3xl font-semibold tracking-tight">{loading || error ? "—" : counters[state] || 0}</span>
+                      <span aria-hidden="true" className="text-lg opacity-60">↗</span>
+                    </div>
                   </Link>
                 ))}
               </div>
             </div>
 
-            <div className="rounded border bg-white">
-              <div className="border-b px-5 py-4">
-                <div className="font-semibold text-slate-900">Accesos rapidos</div>
-                <div className="text-sm text-slate-500">Atajos recomendados</div>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-5">
+                <div className="font-semibold text-slate-900">Accesos rápidos</div>
+                <div className="text-sm text-slate-500">Tu espacio de trabajo</div>
               </div>
               <div className="space-y-3 p-5">
                 {actions.map((action) => (
                   <Link
                     key={action.label}
                     to={action.to}
-                    className={`block rounded border p-4 transition hover:shadow-sm ${
-                      action.primary ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-800"
+                    className={`group block rounded-xl border p-4 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${
+                      action.primary ? "border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700" : "border-slate-200 bg-white text-slate-800 hover:border-indigo-200 hover:bg-indigo-50"
                     }`}
                   >
-                    <div className="font-semibold">{action.label}</div>
-                    <div className={`mt-1 text-sm ${action.primary ? "text-slate-300" : "text-slate-500"}`}>
+                    <div className="flex items-center justify-between gap-3 font-semibold">{action.label}<span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span></div>
+                    <div className={`mt-1 text-sm leading-relaxed ${action.primary ? "text-indigo-100" : "text-slate-500"}`}>
                       {action.description}
                     </div>
                   </Link>

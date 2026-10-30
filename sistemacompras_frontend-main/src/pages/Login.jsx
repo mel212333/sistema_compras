@@ -60,12 +60,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div
+      className="min-h-screen min-h-[100svh] flex items-center justify-center bg-slate-950 bg-cover bg-center bg-no-repeat px-4 py-8"
+      style={{
+        backgroundImage: "linear-gradient(rgba(8, 25, 55, 0.58), rgba(8, 25, 55, 0.58)), url('/ingenio-rio-grande-login.webp')",
+      }}
+    >
       {loading && <Loader />}
 
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold text-center text-indigo-600 mb-6">
-          Iniciar Sesion
+          Iniciar sesión
         </h2>
 
         {error && (
@@ -74,10 +79,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block font-medium text-gray-700">
-              Correo electronico
+            <label htmlFor="login-email" className="block font-medium text-gray-700">
+              Correo electrónico
             </label>
             <input
+              id="login-email"
+              name="email"
+              autoComplete="username"
               type="email"
               className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
               placeholder="correo@empresa.com"
@@ -87,10 +95,13 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block font-medium text-gray-700">
-              Contrasena
+            <label htmlFor="login-password" className="block font-medium text-gray-700">
+              Contraseña
             </label>
             <input
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
               type="password"
               className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
               placeholder="********"
